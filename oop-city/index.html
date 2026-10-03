@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OOP CITY — Where Everything Is an Object</title>
+<meta name="description" content="OOP CITY: an interactive city that teaches Object-Oriented Programming in Java — classes, encapsulation, abstraction, inheritance and polymorphism.">
+<meta name="theme-color" content="#04060d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-scene="landing">
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="warp" id="warp" aria-hidden="true"></div>
+<div class="sweep" id="sweep" aria-hidden="true"></div>
+
+<!-- ============ HUD ============ -->
+<header class="hud" id="hud">
+  <div class="hud-left">
+    <button class="btn-ghost" id="btnReturn" type="button">← RETURN TO CITY</button>
+    <div class="brand" id="brand"><span class="brand-mark" aria-hidden="true"></span><span class="brand-t">OOP CITY</span></div>
+  </div>
+  <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" aria-label="OOP concepts completed">
+    <div class="pg-label"><b id="pgCount">0</b><span>/5</span><em>CONCEPTS</em></div>
+    <div class="pg-track">
+      <i data-k="class" title="Classes &amp; Objects"></i>
+      <i data-k="encap" title="Encapsulation"></i>
+      <i data-k="abstr" title="Abstraction"></i>
+      <i data-k="inher" title="Inheritance"></i>
+      <i data-k="poly" title="Polymorphism"></i>
+    </div>
+  </div>
+  <button class="btn-ghost" id="btnSound" type="button" aria-pressed="false">SOUND OFF</button>
+</header>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<main id="app">
+
+<!-- ============ 1. LANDING ============ -->
+<section class="scene is-active" id="landing" aria-label="Welcome to OOP City">
+  <div class="land-glow" aria-hidden="true"></div>
+  <svg class="land-sky" id="landSky" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+  <div class="land-grid" aria-hidden="true"></div>
+  <div class="land-code" aria-hidden="true">
+    <span>&gt; City city = new City("OOP");</span>
+    <span>&gt; city.enter();</span>
+    <span class="blink">&gt; _</span>
+  </div>
+  <div class="land-content">
+    <p class="eyebrow">A VISUAL GUIDE TO OBJECT-ORIENTED PROGRAMMING · JAVA</p>
+    <h1 class="title" aria-label="OOP CITY">
+      <span class="word" aria-hidden="true"><span class="ch" style="--i:0">O</span><span class="ch" style="--i:1">O</span><span class="ch" style="--i:2">P</span></span>
+      <span class="word" aria-hidden="true"><span class="ch" style="--i:3">C</span><span class="ch" style="--i:4">I</span><span class="ch" style="--i:5">T</span><span class="ch" style="--i:6">Y</span></span>
+    </h1>
+    <p class="subtitle">WHERE EVERYTHING IS AN OBJECT</p>
+    <p class="tagline">Don't just learn OOP. Walk through it.</p>
+    <button class="btn-primary btn-xl" id="btnEnter" type="button">ENTER THE CITY <span aria-hidden="true">→</span></button>
+  </div>
+</section>
+
+<!-- ============ 2. CITY MAP ============ -->
+<section class="scene" id="city" aria-label="OOP City map" aria-hidden="true">
+  <div class="city-viewport" id="cityViewport">
+    <div class="city-world" id="cityWorld">
+      <svg id="citySvg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Interactive map of OOP City with five districts">
+        <defs>
+          <linearGradient id="gGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1431"/><stop offset="1" stop-color="#04060f"/></linearGradient>
+          <linearGradient id="gRoad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#070c1d"/><stop offset="1" stop-color="#050813"/></linearGradient>
+          <linearGradient id="gBeam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#d77bff" stop-opacity=".5"/><stop offset="1" stop-color="#d77bff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b7bff" stop-opacity="0"/><stop offset="1" stop-color="#2b7bff" stop-opacity=".16"/></linearGradient>
+          <symbol id="car" viewBox="0 0 60 24" overflow="visible">
+            <path d="M2 17 L7 10 Q9 7 13 7 L38 7 Q42 7 46 11 L54 13 Q58 14 58 17 L58 20 L2 20 Z" fill="currentColor"/>
+            <path d="M15 8.5 L36 8.5 L42 12 L12 12 Z" fill="#050a1a" opacity=".85"/>
+            <circle cx="15" cy="20" r="4" fill="#050a1a" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="46" cy="20" r="4" fill="#050a1a" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="55" y="13.5" width="4" height="3" fill="#fff"/>
+            <rect x="0" y="13.5" width="3" height="3" fill="#ff4d6a"/>
+          </symbol>
+        </defs>
+
+        <g id="skyLayer"></g>
+        <g id="farLayer"></g>
+        <rect x="-800" y="300" width="2800" height="242" fill="url(#gHaze)"/>
+
+        <!-- elevated transit line -->
+        <g class="transit" aria-hidden="true">
+          <line x1="-800" y1="388" x2="2000" y2="388" class="track"/>
+          <g class="train-run"><rect x="0" y="376" width="90" height="10" rx="4" class="train"/><rect x="8" y="379" width="8" height="4" class="tw"/><rect x="24" y="379" width="8" height="4" class="tw"/><rect x="40" y="379" width="8" height="4" class="tw"/><rect x="56" y="379" width="8" height="4" class="tw"/><rect x="72" y="379" width="8" height="4" class="tw"/></g>
+        </g>
+        <g id="drones" aria-hidden="true"></g>
+
+        <g id="buildings" class="city-arrive">
+
+          <!-- 01 CLASS FACTORY -->
+          <g class="bld" data-d="class" style="--c:41,227,255;--k:0" transform="translate(50 0)" tabindex="0" role="button" aria-label="Enter Class Factory">
+            <g class="lift">
+              <rect class="hit" x="-14" y="240" width="248" height="302"/>
+              <g class="shape">
+                <rect class="body" x="26" y="334" width="22" height="80"/>
+                <rect class="body" x="68" y="356" width="22" height="58"/>
+                <rect class="body" x="172" y="346" width="24" height="68"/>
+                <g class="smokes"><circle class="smoke" cx="37" cy="326" r="7"/><circle class="smoke d2" cx="79" cy="348" r="6"/><circle class="smoke d3" cx="184" cy="338" r="7"/></g>
+                <path class="body" d="M0 414 V386 L44 414 V386 L88 414 V386 L132 414 V386 L176 414 V386 L220 414 Z"/>
+                <rect class="body" x="0" y="414" width="220" height="126"/>
+                <g class="wins" data-x="14" data-y="428" data-w="110" data-h="38" data-c="6" data-r="2"/>
+                <rect class="door" x="20" y="486" width="68" height="54"/>
+                <path class="line" d="M20 502 H88 M20 518 H88"/>
+                <g transform="translate(168 480)"><g class="spin">
+                  <circle class="gear-b" r="15"/><circle class="gear-b" r="5"/>
+                  <rect class="gear-t" x="-3" y="-22" width="6" height="8"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(45)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(90)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(135)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(180)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(225)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(270)"/><rect class="gear-t" x="-3" y="-22" width="6" height="8" transform="rotate(315)"/>
+                </g></g>
+                <line class="line" x1="96" y1="530" x2="214" y2="530"/>
+                <rect class="crate" x="96" y="520" width="12" height="10"/><rect class="crate c2" x="96" y="520" width="12" height="10"/>
+              </g>
+              <g class="tag" transform="translate(110 246)">
+                <circle class="dot" cx="-14" cy="-4" r="3"/><g class="chk"><circle cx="-14" cy="-4" r="7"/><path d="M-18 -4 L-15 -1 L-10 -8"/></g>
+                <text class="tag-n" x="6" y="0">01</text>
+                <text class="tag-t" y="22">CLASS</text><text class="tag-s" y="40">FACTORY</text>
+                <text class="tag-go" y="58">ENTER →</text>
+                <line class="leader" x1="0" y1="66" x2="0" y2="80"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- 02 ENCAPSULATION BANK -->
+          <g class="bld" data-d="encap" style="--c:77,141,255;--k:1" transform="translate(320 0)" tabindex="0" role="button" aria-label="Enter Encapsulation Bank">
+            <g class="lift">
+              <rect class="hit" x="-14" y="290" width="208" height="252"/>
+              <g class="shape">
+                <polygon class="body" points="-8,442 90,378 188,442"/>
+                <rect class="body" x="-8" y="438" width="196" height="10"/>
+                <rect class="body" x="0" y="448" width="180" height="92"/>
+                <rect class="col" x="10" y="454" width="12" height="80"/><rect class="col" x="36" y="454" width="12" height="80"/>
+                <rect class="col" x="132" y="454" width="12" height="80"/><rect class="col" x="158" y="454" width="12" height="80"/>
+                <circle class="line" cx="90" cy="416" r="12"/>
+                <rect class="lockb" x="84" y="415" width="12" height="9" rx="2"/><path class="line" d="M86 415 V411 A4 4 0 0 1 94 411 V415"/>
+                <g transform="translate(90 500)">
+                  <circle class="vault-o" r="29"/><g class="spin slow"><circle class="vault-i" r="20"/><path class="line" d="M-20 0 H20 M0 -20 V20 M-14 -14 L14 14 M14 -14 L-14 14"/></g><circle class="vault-h" r="5"/>
+                </g>
+                <rect class="body" x="-6" y="534" width="192" height="6"/>
+              </g>
+              <g class="tag" transform="translate(90 296)">
+                <circle class="dot" cx="-14" cy="-4" r="3"/><g class="chk"><circle cx="-14" cy="-4" r="7"/><path d="M-18 -4 L-15 -1 L-10 -8"/></g>
+                <text class="tag-n" x="6" y="0">02</text>
+                <text class="tag-t" y="22">ENCAPSULATION</text><text class="tag-s" y="40">BANK</text>
+                <text class="tag-go" y="58">ENTER →</text>
+                <line class="leader" x1="0" y1="66" x2="0" y2="82"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- 03 ABSTRACTION CONTROL CENTER -->
+          <g class="bld" data-d="abstr" style="--c:155,123,255;--k:2" transform="translate(545 0)" tabindex="0" role="button" aria-label="Enter Abstraction Control Center">
+            <g class="lift">
+              <rect class="hit" x="-14" y="240" width="228" height="302"/>
+              <g class="shape">
+                <line class="line" x1="150" y1="394" x2="150" y2="344"/>
+                <circle class="beacon" cx="150" cy="340" r="4"/>
+                <g transform="translate(40 394)"><g class="sway"><path class="body" d="M-24 -2 Q0 -38 24 -2 Z"/><line class="line" x1="0" y1="-14" x2="0" y2="-28"/><circle class="beacon" cx="0" cy="-28" r="2.5"/></g></g>
+                <rect class="body" x="14" y="394" width="172" height="18"/>
+                <rect class="body" x="0" y="412" width="200" height="128"/>
+                <rect class="screen" x="20" y="428" width="160" height="64" rx="6"/>
+                <g class="eqs"><rect class="eq" x="32" y="446" width="10" height="36"/><rect class="eq e2" x="50" y="446" width="10" height="36"/><rect class="eq e3" x="68" y="446" width="10" height="36"/><rect class="eq e4" x="86" y="446" width="10" height="36"/><rect class="eq e5" x="104" y="446" width="10" height="36"/><rect class="eq e6" x="122" y="446" width="10" height="36"/><rect class="eq e2" x="140" y="446" width="10" height="36"/><rect class="eq e4" x="158" y="446" width="10" height="36"/></g>
+                <circle class="knob" cx="60" cy="516" r="6"/><circle class="knob k2" cx="100" cy="516" r="6"/><circle class="knob k3" cx="140" cy="516" r="6"/>
+              </g>
+              <g class="tag" transform="translate(100 252)">
+                <circle class="dot" cx="-14" cy="-4" r="3"/><g class="chk"><circle cx="-14" cy="-4" r="7"/><path d="M-18 -4 L-15 -1 L-10 -8"/></g>
+                <text class="tag-n" x="6" y="0">03</text>
+                <text class="tag-t" y="22">ABSTRACTION</text><text class="tag-s" y="40">CONTROL CENTER</text>
+                <text class="tag-go" y="58">ENTER →</text>
+                <line class="leader" x1="0" y1="66" x2="0" y2="80"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- 04 INHERITANCE TOWER -->
+          <g class="bld" data-d="inher" style="--c:90,240,208;--k:3" transform="translate(795 0)" tabindex="0" role="button" aria-label="Enter Inheritance Tower">
+            <g class="lift">
+              <rect class="hit" x="-14" y="86" width="168" height="456"/>
+              <g class="shape">
+                <line class="line" x1="70" y1="238" x2="70" y2="176"/>
+                <circle class="beacon" cx="70" cy="172" r="4"/>
+                <rect class="body" x="55" y="238" width="30" height="62"/>
+                <rect class="body" x="40" y="298" width="60" height="76"/>
+                <rect class="body" x="20" y="372" width="100" height="80"/>
+                <rect class="body" x="0" y="450" width="140" height="90"/>
+                <g class="wins" data-x="60" data-y="248" data-w="20" data-h="44" data-c="2" data-r="3"/>
+                <g class="wins" data-x="46" data-y="308" data-w="48" data-h="56" data-c="4" data-r="4"/>
+                <g class="wins" data-x="26" data-y="382" data-w="88" data-h="60" data-c="6" data-r="4"/>
+                <path class="line" d="M70 470 V484 H34 M70 484 H106 M34 484 V500 M106 484 V500 M70 484 V500"/>
+                <circle class="node" cx="70" cy="468" r="4"/><circle class="node" cx="34" cy="502" r="3.5"/><circle class="node" cx="70" cy="502" r="3.5"/><circle class="node" cx="106" cy="502" r="3.5"/>
+                <rect class="band" x="16" y="370" width="108" height="3"/><rect class="band" x="-4" y="448" width="148" height="3"/>
+              </g>
+              <g class="tag" transform="translate(70 92)">
+                <circle class="dot" cx="-14" cy="-4" r="3"/><g class="chk"><circle cx="-14" cy="-4" r="7"/><path d="M-18 -4 L-15 -1 L-10 -8"/></g>
+                <text class="tag-n" x="6" y="0">04</text>
+                <text class="tag-t" y="22">INHERITANCE</text><text class="tag-s" y="40">TOWER</text>
+                <text class="tag-go" y="58">ENTER →</text>
+                <line class="leader" x1="0" y1="66" x2="0" y2="80"/>
+              </g>
+            </g>
+          </g>
+
+          <!-- 05 POLYMORPHISM ARENA -->
+          <g class="bld" data-d="poly" style="--c:215,123,255;--k:4" transform="translate(965 0)" tabindex="0" role="button" aria-label="Enter Polymorphism Arena">
+            <g class="lift">
+              <rect class="hit" x="-30" y="240" width="270" height="302"/>
+              <g class="shape">
+                <polygon class="beam" points="-6,410 -30,300 30,300"/><polygon class="beam b2" points="216,410 180,300 240,300"/>
+                <line class="line" x1="-6" y1="540" x2="-6" y2="410"/><line class="line" x1="216" y1="540" x2="216" y2="410"/>
+                <circle class="beacon" cx="-6" cy="408" r="4"/><circle class="beacon" cx="216" cy="408" r="4"/>
+                <path class="body" d="M0 540 C0 472 40 438 105 438 C170 438 210 472 210 540 Z"/>
+                <ellipse class="rim" cx="105" cy="438" rx="84" ry="12"/>
+                <path class="line" d="M12 520 Q105 488 198 520 M24 500 Q105 468 186 500"/>
+                <path class="door" d="M82 540 V512 Q105 494 128 512 V540 Z"/>
+                <g transform="translate(105 462)">
+                  <g class="morph m1"><circle cx="-26" cy="0" r="6"/></g>
+                  <g class="morph m2"><polygon points="0,-7 7,6 -7,6"/></g>
+                  <g class="morph m3"><rect x="20" y="-6" width="12" height="12"/></g>
+                </g>
+              </g>
+              <g class="tag" transform="translate(105 296)">
+                <circle class="dot" cx="-14" cy="-4" r="3"/><g class="chk"><circle cx="-14" cy="-4" r="7"/><path d="M-18 -4 L-15 -1 L-10 -8"/></g>
+                <text class="tag-n" x="6" y="0">05</text>
+                <text class="tag-t" y="22">POLYMORPHISM</text><text class="tag-s" y="40">ARENA</text>
+                <text class="tag-go" y="58">ENTER →</text>
+                <line class="leader" x1="0" y1="66" x2="0" y2="116"/>
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- ground, roads, traffic -->
+        <g id="groundLayer" aria-hidden="true">
+          <rect x="-800" y="540" width="2800" height="240" fill="url(#gGround)"/>
+          <line x1="-800" y1="541" x2="2000" y2="541" class="curb"/>
+          <rect x="-800" y="556" width="2800" height="76" fill="url(#gRoad)"/>
+          <line x1="-800" y1="556" x2="2000" y2="556" class="edge"/><line x1="-800" y1="632" x2="2000" y2="632" class="edge"/>
+          <line x1="-800" y1="594" x2="2000" y2="594" class="lane"/>
+          <rect x="-800" y="648" width="2800" height="70" fill="url(#gRoad)"/>
+          <line x1="-800" y1="648" x2="2000" y2="648" class="edge"/>
+          <line x1="-800" y1="683" x2="2000" y2="683" class="lane"/>
+          <g id="lamps"></g>
+        </g>
+        <g id="carsLayer" aria-hidden="true">
+          <g transform="translate(0 563)"><g class="run r" style="--t:19s;--d:-3s;color:#29e3ff"><use href="#car" width="60" height="24"/></g></g>
+          <g transform="translate(0 563)"><g class="run r" style="--t:23s;--d:-15s;color:#d77bff"><use href="#car" width="60" height="24"/></g></g>
+          <g transform="translate(0 563)"><g class="run r" style="--t:17s;--d:-9s;color:#4d8dff"><use href="#car" width="60" height="24"/></g></g>
+          <g transform="translate(0 602)"><g class="run l" style="--t:21s;--d:-5s;color:#5af0d0"><use href="#car" x="-60" width="60" height="24" transform="scale(-1 1)"/></g></g>
+          <g transform="translate(0 602)"><g class="run l" style="--t:26s;--d:-18s;color:#e8f1ff"><use href="#car" x="-60" width="60" height="24" transform="scale(-1 1)"/></g></g>
+          <g transform="translate(0 654)"><g class="run r" style="--t:11s;--d:-2s;color:#ff4d6a"><use href="#car" width="60" height="24"/></g></g>
+          <g transform="translate(0 654)"><g class="run r" style="--t:14s;--d:-8s;color:#29e3ff"><use href="#car" width="60" height="24"/></g></g>
+          <g transform="translate(0 686)"><g class="run l" style="--t:13s;--d:-6s;color:#9b7bff"><use href="#car" x="-60" width="60" height="24" transform="scale(-1 1)"/></g></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <p class="city-hint" id="cityHint">SELECT A BUILDING TO ENTER ITS DISTRICT</p>
+  <nav class="dock" id="dock" aria-label="Districts">
+    <div class="dock-row">
+      <button class="dock-item" type="button" data-d="class"><span class="di-n">01</span><span class="di-t">CLASS FACTORY</span><i class="di-s"></i></button>
+      <button class="dock-item" type="button" data-d="encap"><span class="di-n">02</span><span class="di-t">ENCAPSULATION BANK</span><i class="di-s"></i></button>
+      <button class="dock-item" type="button" data-d="abstr"><span class="di-n">03</span><span class="di-t">ABSTRACTION CONTROL CENTER</span><i class="di-s"></i></button>
+      <button class="dock-item" type="button" data-d="inher"><span class="di-n">04</span><span class="di-t">INHERITANCE TOWER</span><i class="di-s"></i></button>
+      <button class="dock-item" type="button" data-d="poly"><span class="di-n">05</span><span class="di-t">POLYMORPHISM ARENA</span><i class="di-s"></i></button>
+    </div>
+    <button class="src-btn" id="btnSource" type="button" disabled aria-disabled="true">
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span id="srcLabel">SOURCE CODE LOCKED — VISIT ALL 5 DISTRICTS</span>
+    </button>
+  </nav>
+</section>
+
+<!-- ============ 3. CLASS FACTORY ============ -->
+<section class="scene district" id="d-class" style="--acc:#29e3ff;--acc-rgb:41,227,255" aria-label="Class Factory" aria-hidden="true">
+  <div class="d-inner">
+    <header class="d-head">
+      <div>
+        <p class="d-kicker">DISTRICT 01 · CLASSES &amp; OBJECTS</p>
+        <h2 class="d-title" tabindex="-1">CLASS FACTORY</h2>
+      </div>
+      <p class="d-core"><b>A class is a blueprint.</b> Objects are instances created from that blueprint.</p>
+    </header>
+    <div class="d-body">
+      <div class="col-code">
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>Car.java</span><em>CLASS</em></div>
+          <div class="code" id="codeClass" role="region" aria-label="Java source: class Car"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>Main.java</span><em>LIVE</em></div>
+          <div class="code code-live" id="codeMain" role="region" aria-label="Live main method" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="panel stage factory">
+        <div class="panel-bar"><i></i><i></i><i></i><span>FACTORY FLOOR</span></div>
+        <div class="stage-in">
+          <div class="bp">
+            <div class="bp-tag">CLASS</div>
+            <svg class="bp-car" viewBox="0 0 150 56" aria-hidden="true">
+              <path d="M8 40 L18 24 Q22 18 30 18 L86 18 Q98 18 108 28 L130 33 Q140 35 140 42 L140 46 L8 46 Z" class="bp-line"/>
+              <path d="M32 21 L84 21 Q92 21 98 28 L28 28 Z" class="bp-line"/>
+              <circle cx="38" cy="46" r="9" class="bp-line"/><circle cx="108" cy="46" r="9" class="bp-line"/>
+              <path d="M8 6 H140 M8 3 V9 M140 3 V9" class="bp-dim"/>
+            </svg>
+            <div class="bp-fields"><span>String color</span><span>int speed</span><span>accelerate()</span></div>
+          </div>
+          <div class="bp-flow" aria-hidden="true"><i></i><span>new Car()</span><svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 3 L6 9 L11 3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <div class="objects" id="objects"></div>
+          <p class="empty" id="objEmpty">No objects yet — press CREATE OBJECT to build one from the class.</p>
+          <div class="controls">
+            <button class="btn-primary" id="btnCreate" type="button">CREATE OBJECT</button>
+            <button class="btn-ghost" id="btnClearCars" type="button">CLEAR FLOOR</button>
+          </div>
+          <p class="note">Same class, different state. Each object keeps its own <code>color</code> and <code>speed</code>.</p>
+        </div>
+      </div>
+    </div>
+    <footer class="d-foot">
+      <ul class="obj-list" data-for="class" aria-label="Objectives">
+        <li data-o="create3">Create 3 objects</li>
+        <li data-o="accel">Call accelerate() on one</li>
+      </ul>
+      <button class="btn-primary done-cta" type="button" hidden>DISTRICT COMPLETE — RETURN TO CITY →</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 4. ENCAPSULATION BANK ============ -->
+<section class="scene district" id="d-encap" style="--acc:#4d8dff;--acc-rgb:77,141,255" aria-label="Encapsulation Bank" aria-hidden="true">
+  <div class="d-inner">
+    <header class="d-head">
+      <div>
+        <p class="d-kicker">DISTRICT 02 · ENCAPSULATION</p>
+        <h2 class="d-title" tabindex="-1">ENCAPSULATION BANK</h2>
+      </div>
+      <p class="d-core"><b>Encapsulation protects internal data</b> and controls how it is accessed.</p>
+    </header>
+    <div class="d-body">
+      <div class="col-code">
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>BankAccount.java</span><em>CLASS</em></div>
+          <div class="code" id="codeBank" role="region" aria-label="Java source: class BankAccount"></div>
+        </div>
+        <div class="panel mini-note">
+          <p><b>private</b> = only code inside <code>BankAccount</code> can touch the field.</p>
+          <p><b>public</b> methods = the only doors in, and they can validate every request.</p>
+        </div>
+      </div>
+      <div class="panel stage bank">
+        <div class="panel-bar"><i></i><i></i><i></i><span>VAULT · LIVE VIEW</span></div>
+        <div class="stage-in">
+          <div class="bank-grid">
+            <div class="vault" id="vault">
+              <svg viewBox="0 0 320 280" aria-hidden="true">
+                <rect x="6" y="6" width="308" height="268" rx="18" class="v-wall"/>
+                <rect x="20" y="20" width="280" height="240" rx="12" class="v-wall2"/>
+                <g transform="translate(160 140)">
+                  <g class="v-ring"><circle r="112" class="v-r1"/>
+                    <g class="v-bolts"><circle cx="0" cy="-112" r="5"/><circle cx="79" cy="-79" r="5"/><circle cx="112" cy="0" r="5"/><circle cx="79" cy="79" r="5"/><circle cx="0" cy="112" r="5"/><circle cx="-79" cy="79" r="5"/><circle cx="-112" cy="0" r="5"/><circle cx="-79" cy="-79" r="5"/></g>
+                  </g>
+                  <circle r="94" class="v-r2"/>
+                  <circle r="78" class="v-core"/>
+                </g>
+              </svg>
+              <div class="vault-tag">PRIVATE ZONE</div>
+              <div class="vault-core"><small>private double balance</small><strong id="vaultBal">$ ••••••</strong><span class="lockline"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> LOCKED</span></div>
+              <div class="deny" id="deny" aria-hidden="true">ACCESS DENIED — PRIVATE FIELD</div>
+            </div>
+            <div class="gate-col">
+              <div class="gate-title">PUBLIC INTERFACE</div>
+              <div class="gate" data-g="deposit">deposit(double)</div>
+              <div class="gate" data-g="withdraw">withdraw(double)</div>
+              <div class="gate" data-g="get">getBalance()</div>
+              <div class="readout"><small>RETURNED VALUE</small><strong id="readVal">—</strong></div>
+            </div>
+          </div>
+          <div class="bank-controls">
+            <label class="amt"><span>AMOUNT</span><input id="amt" type="number" inputmode="decimal" min="0" step="10" value="100" aria-label="Amount"></label>
+            <button class="btn-primary" id="btnDeposit" type="button">DEPOSIT</button>
+            <button class="btn-primary alt" id="btnWithdraw" type="button">WITHDRAW</button>
+            <button class="btn-primary alt" id="btnView" type="button">VIEW BALANCE</button>
+            <button class="btn-danger" id="btnHack" type="button">TRY: account.balance</button>
+          </div>
+          <div class="term" id="bankTerm" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="d-foot">
+      <ul class="obj-list" data-for="encap" aria-label="Objectives">
+        <li data-o="hack">Try to read the private field</li>
+        <li data-o="deposit">Deposit through deposit()</li>
+        <li data-o="view">Read it through getBalance()</li>
+      </ul>
+      <button class="btn-primary done-cta" type="button" hidden>DISTRICT COMPLETE — RETURN TO CITY →</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 5. ABSTRACTION CONTROL CENTER ============ -->
+<section class="scene district" id="d-abstr" style="--acc:#9b7bff;--acc-rgb:155,123,255" aria-label="Abstraction Control Center" aria-hidden="true">
+  <div class="d-inner">
+    <header class="d-head">
+      <div>
+        <p class="d-kicker">DISTRICT 03 · ABSTRACTION</p>
+        <h2 class="d-title" tabindex="-1">ABSTRACTION CONTROL CENTER</h2>
+      </div>
+      <p class="d-core"><b>Abstraction exposes essential functionality</b> while hiding implementation details.</p>
+    </header>
+    <div class="d-body">
+      <div class="col-code">
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>Drivable.java</span>
+            <div class="tabs" role="tablist"><button type="button" role="tab" class="tab on" data-tab="visible" aria-selected="true">WHAT YOU SEE</button><button type="button" role="tab" class="tab" data-tab="hidden" aria-selected="false">WHAT'S HIDDEN</button></div>
+          </div>
+          <div class="code" id="codeAbstr" role="region" aria-label="Java source for abstraction"></div>
+        </div>
+      </div>
+      <div class="panel stage control">
+        <div class="panel-bar"><i></i><i></i><i></i><span>CONTROL ROOM</span></div>
+        <div class="stage-in">
+          <div class="console" id="console">
+            <div class="glass-layer" aria-hidden="true">
+              <p class="gl-title">HIDDEN IMPLEMENTATION</p>
+              <ul class="systems" id="systems">
+                <li><b>Engine</b><span>engine.ignite()</span></li>
+                <li><b>Sensors</b><span>sensors.runSelfCheck()</span></li>
+                <li><b>Fuel Injection</b><span>fuelInjection.primePump()</span></li>
+                <li><b>ECU</b><span>ecu.loadEngineMap()</span></li>
+                <li><b>Transmission</b><span>transmission.shiftToNeutral()</span></li>
+              </ul>
+            </div>
+            <div class="ui-layer">
+              <div class="screen">
+                <div class="gauge">
+                  <svg viewBox="0 0 200 118" aria-hidden="true">
+                    <path d="M20 100 A80 80 0 0 1 180 100" class="g-arc"/>
+                    <g id="ticks"></g>
+                    <g id="needle" class="needle"><line x1="100" y1="100" x2="100" y2="38"/><circle cx="100" cy="100" r="6"/></g>
+                  </svg>
+                  <div class="g-read"><b id="speedVal">0</b><small>km/h</small></div>
+                </div>
+                <div class="status" id="ctlStatus">ENGINE OFF</div>
+              </div>
+              <div class="btnrow">
+                <button class="btn-primary" id="btnStart" type="button">START</button>
+                <button class="btn-primary alt" id="btnAccel" type="button">ACCELERATE</button>
+                <button class="btn-primary alt" id="btnBrake" type="button">BRAKE</button>
+              </div>
+            </div>
+          </div>
+          <div class="calling"><span>YOUR CODE</span><code id="callLine">car.start();</code></div>
+          <div class="controls"><button class="btn-ghost" id="btnXray" type="button" aria-pressed="false">PEEK BEHIND THE INTERFACE</button></div>
+          <div class="versus">
+            <div class="vs vs-e"><b>ENCAPSULATION</b><span>Protects <em>data</em>. Can you touch it?</span><code>private double balance</code></div>
+            <div class="vs vs-a"><b>ABSTRACTION</b><span>Hides <em>complexity</em>. Do you need to know how?</span><code>car.start()</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="d-foot">
+      <ul class="obj-list" data-for="abstr" aria-label="Objectives">
+        <li data-o="start">Press START</li>
+        <li data-o="accel">Press ACCELERATE</li>
+        <li data-o="brake">Press BRAKE</li>
+      </ul>
+      <button class="btn-primary done-cta" type="button" hidden>DISTRICT COMPLETE — RETURN TO CITY →</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 6. INHERITANCE TOWER ============ -->
+<section class="scene district" id="d-inher" style="--acc:#5af0d0;--acc-rgb:90,240,208" aria-label="Inheritance Tower" aria-hidden="true">
+  <div class="d-inner">
+    <header class="d-head">
+      <div>
+        <p class="d-kicker">DISTRICT 04 · INHERITANCE</p>
+        <h2 class="d-title" tabindex="-1">INHERITANCE TOWER</h2>
+      </div>
+      <p class="d-core"><b>Inheritance lets a class reuse and extend</b> another class's properties and behavior.</p>
+    </header>
+    <div class="d-body">
+      <div class="col-code">
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span id="towerFile">Vehicle.java</span><em>EXTENDS CHAIN</em></div>
+          <div class="code" id="codeTower" role="region" aria-label="Java source of the selected class chain"></div>
+        </div>
+      </div>
+      <div class="panel stage tower">
+        <div class="panel-bar"><i></i><i></i><i></i><span>CLASS HIERARCHY</span></div>
+        <div class="stage-in">
+          <div class="tower-grid">
+            <div class="tree-wrap"><svg id="tree" viewBox="0 0 440 380" role="group" aria-label="Class hierarchy: Vehicle, Car, Bike, Tesla, BMW"></svg></div>
+            <div class="inspector">
+              <div class="insp-head"><small>SELECTED CLASS</small><strong id="inspName">Vehicle</strong><span id="inspChain">Vehicle</span></div>
+              <div class="insp-group"><h4>FIELDS</h4><div class="chips" id="inspFields"></div></div>
+              <div class="insp-group"><h4>METHODS <small>click to call</small></h4><div class="chips" id="inspMethods"></div></div>
+              <div class="legend"><span class="lg own">own</span><span class="lg inh">inherited</span></div>
+            </div>
+          </div>
+          <div class="controls"><button class="btn-primary" id="btnFlow" type="button">SEND INHERITANCE DOWN</button></div>
+          <div class="term" id="towerTerm" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="d-foot">
+      <ul class="obj-list" data-for="inher" aria-label="Objectives">
+        <li data-o="sub">Select a subclass (Car, Bike, Tesla or BMW)</li>
+        <li data-o="call">Call an inherited method</li>
+      </ul>
+      <button class="btn-primary done-cta" type="button" hidden>DISTRICT COMPLETE — RETURN TO CITY →</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 7. POLYMORPHISM ARENA ============ -->
+<section class="scene district" id="d-poly" style="--acc:#d77bff;--acc-rgb:215,123,255" aria-label="Polymorphism Arena" aria-hidden="true">
+  <div class="d-inner">
+    <header class="d-head">
+      <div>
+        <p class="d-kicker">DISTRICT 05 · POLYMORPHISM</p>
+        <h2 class="d-title" tabindex="-1">POLYMORPHISM ARENA</h2>
+      </div>
+      <p class="d-core"><b>One method call, many behaviors.</b> The object's actual class decides what runs.</p>
+    </header>
+    <div class="d-body">
+      <div class="col-code">
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>Animal.java</span><em>OVERRIDING</em></div>
+          <div class="code code-tall" id="codePoly" role="region" aria-label="Java source: Animal, Dog, Cat and Cow"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-bar"><i></i><i></i><i></i><span>Main.java</span><em>LIVE</em></div>
+          <div class="code code-live" id="codePolyMain" role="region" aria-label="Main method" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="panel stage arena-stage">
+        <div class="panel-bar"><i></i><i></i><i></i><span>THE ARENA</span></div>
+        <div class="stage-in">
+          <div class="poly-banner" aria-label="One interface, different behavior">
+            <span class="pb-a">ONE INTERFACE</span><span class="pb-arrow" aria-hidden="true">→</span><span class="pb-b" id="pbOut">DIFFERENT BEHAVIOR</span>
+          </div>
+          <div class="arena" id="arena">
+            <svg id="arenaSvg" viewBox="0 0 600 460" role="group" aria-label="Circular arena with a Dog, a Cat and a Cow"></svg>
+            <div class="bubble" data-a="dog">WOOF!</div>
+            <div class="bubble" data-a="cat">MEOW!</div>
+            <div class="bubble" data-a="cow">MOO!</div>
+          </div>
+          <div class="poly-info">
+            <span><small>REFERENCE TYPE</small><b>Animal</b></span>
+            <span><small>ACTUAL OBJECT</small><b id="infoObj">Dog</b></span>
+            <span><small>RUNS AT RUNTIME</small><b id="infoRun">Dog.makeSound()</b></span>
+          </div>
+          <div class="poly-controls">
+            <div class="ref-pick" role="radiogroup" aria-label="Choose what the Animal reference points to">
+              <button type="button" role="radio" class="ref on" data-a="dog" aria-checked="true">new Dog()</button>
+              <button type="button" role="radio" class="ref" data-a="cat" aria-checked="false">new Cat()</button>
+              <button type="button" role="radio" class="ref" data-a="cow" aria-checked="false">new Cow()</button>
+            </div>
+            <div class="call-row">
+              <button class="btn-primary" id="btnCall" type="button">animal.makeSound()</button>
+              <button class="btn-primary alt" id="btnZoo" type="button">FOR EACH ANIMAL</button>
+            </div>
+          </div>
+          <div class="term" id="polyTerm" role="log" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="d-foot">
+      <ul class="obj-list" data-for="poly" aria-label="Objectives">
+        <li data-o="dog">Hear the Dog</li>
+        <li data-o="cat">Hear the Cat</li>
+        <li data-o="cow">Hear the Cow</li>
+      </ul>
+      <button class="btn-primary done-cta" type="button" hidden>DISTRICT COMPLETE — RETURN TO CITY →</button>
+    </footer>
+  </div>
+</section>
+
+<!-- ============ 8. SOURCE CODE ============ -->
+<section class="scene" id="source" aria-label="Final source code" aria-hidden="true">
+  <div class="src-wrap">
+    <div class="editor">
+      <div class="ed-bar">
+        <span class="dots"><i></i><i></i><i></i></span>
+        <span class="ed-tab">OOPCity.java</span>
+        <div class="ed-legend" id="edLegend" role="group" aria-label="Highlight a concept">
+          <button type="button" data-k="class">CLASS</button>
+          <button type="button" data-k="encap">ENCAPSULATION</button>
+          <button type="button" data-k="abstr">ABSTRACTION</button>
+          <button type="button" data-k="inher">INHERITANCE</button>
+          <button type="button" data-k="poly">POLYMORPHISM</button>
+        </div>
+      </div>
+      <div class="ed-main">
+        <div class="ed-code" id="edCode" role="region" aria-label="Complete Java program"></div>
+        <div class="ed-term" id="edOut" role="log" aria-live="polite"><div class="t-line dim">$ terminal ready</div></div>
+      </div>
+      <div class="ed-foot">
+        <span class="ed-status" id="edStatus">COMPILING THE CITY…</span>
+        <div class="ed-actions">
+          <button class="btn-ghost" id="btnSkip" type="button">SKIP TYPING</button>
+          <button class="btn-primary" id="btnRun" type="button" disabled>RUN ▶</button>
+          <button class="btn-primary alt" id="btnFinish" type="button" disabled>FINISH →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. FINALE ============ -->
+<section class="scene" id="finale" aria-label="OOP City complete" aria-hidden="true">
+  <div class="fin-in">
+    <p class="fin-kicker">YOU MADE IT.</p>
+    <h2 class="fin-title" tabindex="-1">OOP CITY<br><span>COMPLETE</span></h2>
+    <ul class="fin-list">
+      <li><i>✓</i>Classes &amp; Objects</li>
+      <li><i>✓</i>Encapsulation</li>
+      <li><i>✓</i>Abstraction</li>
+      <li><i>✓</i>Inheritance</li>
+      <li><i>✓</i>Polymorphism</li>
+    </ul>
+    <p class="fin-quote">
+      <span>OBJECTS HAVE STATE.</span>
+      <span>OBJECTS HAVE BEHAVIOR.</span>
+      <span>OBJECTS INTERACT.</span>
+      <strong>THAT'S OOP.</strong>
+    </p>
+    <button class="btn-primary btn-xl" id="btnAgain" type="button">EXPLORE AGAIN</button>
+  </div>
+</section>
+
+</main>
+<script src="script.js"></script>
+</body>
+</html>
